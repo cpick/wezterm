@@ -4,6 +4,9 @@ set -e
 
 TARGET_DIR=${1:-target}
 
+# currently only implemented for darwin/macOS
+BUILD_PROFILE=${BUILD_PROFILE:-release}
+
 TAG_NAME=${TAG_NAME:-$(git -c "core.abbrev=8" show -s "--format=%cd-%h" "--date=format:%Y%m%d-%H%M%S")}
 
 HERE=$(pwd)
@@ -38,17 +41,17 @@ case $OSTYPE in
     tic -xe wezterm -o $zipdir/WezTerm.app/Contents/Resources/terminfo termwiz/data/wezterm.terminfo
 
     for bin in wezterm wezterm-mux-server wezterm-gui strip-ansi-escapes ; do
-      # If the user ran a simple `cargo build --release`, then we want to allow
+      # If the user ran a simple `cargo build`/`cargo build --release`, then we want to allow
       # a single-arch package to be built
-      if [[ -f target/release/$bin ]] ; then
-        cp target/release/$bin $zipdir/WezTerm.app/Contents/MacOS/$bin
+      if [[ -f target/$BUILD_PROFILE/$bin ]] ; then
+        cp target/$BUILD_PROFILE/$bin $zipdir/WezTerm.app/Contents/MacOS/$bin
       else
         # The CI runs `cargo build --target XXX --release` which means that
         # the binaries will be deployed in `target/XXX/release` instead of
         # the plain path above.
         # In that situation, we have two architectures to assemble into a
         # Universal ("fat") binary, so we use the `lipo` tool for that.
-        lipo target/*/release/$bin -output $zipdir/WezTerm.app/Contents/MacOS/$bin -create
+        lipo target/*/$BUILD_PROFILE/$bin -output $zipdir/WezTerm.app/Contents/MacOS/$bin -create
       fi
     done
 
