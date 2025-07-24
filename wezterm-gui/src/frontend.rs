@@ -121,6 +121,8 @@ impl GuiFrontEnd {
                                 }
                             };
 
+                            log::info!("####### current: ({window_id}, {tab_id}, {pane_id}) focused: ({f_window}, {f_tab}, {f_pane}) show: {show}");
+
                             if show {
                                 let message = if title.is_none() { "" } else { &body };
                                 let title = title.as_ref().unwrap_or(&body);
